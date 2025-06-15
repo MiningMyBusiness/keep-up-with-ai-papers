@@ -92,16 +92,40 @@ def download_arxiv_pdf(arxiv_id: str, dest_folder: str, filename: str):
         logger.error(f"Error downloading {pdf_url}: {e}")
         raise
 
-def main(start_date, end_date, out_dir="papers"):
+def main(start_date, end_date, out_dir="papers", show_eta=False):
     logger.info(f"Starting paper download from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
     logger.info(f"Output directory: {out_dir}")
     
     os.makedirs(out_dir, exist_ok=True)
     logger.debug(f"Ensured output directory exists: {out_dir}")
 
+    # Calculate total days and papers for ETA
+    total_days = (end_date - start_date).days + 1
+    days_processed = 0
+    start_time = time.time()
+
     for dt in daterange(start_date, end_date):
+        days_processed += 1
         logger.info(f"Processing date: {dt.strftime('%Y-%m-%d')}")
-        print(f"\n=== {dt.strftime('%Y-%m-%d')} ===")
+        
+        # Calculate and display ETA if requested
+        if show_eta and days_processed > 1:
+            elapsed_time = time.time() - start_time
+            avg_time_per_day = elapsed_time / (days_processed - 1)
+            remaining_days = total_days - days_processed
+            eta_seconds = avg_time_per_day * remaining_days
+            
+            # Format ETA nicely
+            if eta_seconds < 60:
+                eta_str = f"{int(eta_seconds)} seconds"
+            elif eta_seconds < 3600:
+                eta_str = f"{int(eta_seconds / 60)} minutes"
+            else:
+                eta_str = f"{eta_seconds / 3600:.1f} hours"
+                
+            print(f"\n=== {dt.strftime('%Y-%m-%d')} === (Progress: {days_processed}/{total_days}, ETA: {eta_str})")
+        else:
+            print(f"\n=== {dt.strftime('%Y-%m-%d')} ===")
         
         try:
             arxiv_ids = get_arxiv_ids(dt)
@@ -132,6 +156,7 @@ if __name__ == "__main__":
     parser.add_argument("--out", default="papers", help="Output folder")
     parser.add_argument("--log-file", help="Log file path")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--show-eta", action="store_true", help="Show estimated time remaining")
     args = parser.parse_args()
 
     # Configure logging based on command line arguments
@@ -143,7 +168,7 @@ if __name__ == "__main__":
     try:
         sd = datetime.strptime(args.start, "%Y-%m-%d")
         ed = datetime.strptime(args.end, "%Y-%m-%d")
-        main(sd, ed, args.out)
+        main(sd, ed, args.out, args.show_eta)
         logger.info("Script completed successfully")
     except Exception as e:
         logger.critical(f"Unhandled exception: {e}", exc_info=True)
