@@ -71,7 +71,7 @@ def download_arxiv_pdf(arxiv_id: str, dest_folder: str, filename: str):
     # Check if file already exists
     if os.path.exists(filepath):
         logger.info(f"File already exists: {filepath}, skipping download")
-        print(f"    ↳ Already downloaded: {filename}")
+        print(f"  Already downloaded: {filename}")
         return
     
     pdf_url = f"https://arxiv.org/pdf/{arxiv_id}.pdf"
@@ -84,7 +84,7 @@ def download_arxiv_pdf(arxiv_id: str, dest_folder: str, filename: str):
                 for chunk in resp.iter_content(chunk_size=8192):
                     f.write(chunk)
             logger.info(f"Successfully downloaded: {pdf_url} to {filepath}")
-            print(f"    ↳ Downloaded: {pdf_url}")
+            print(f"  Downloaded: {pdf_url}")
         else:
             logger.warning(f"PDF not found for {arxiv_id} (status {resp.status_code})")
             print(f"  PDF not found for {arxiv_id} (status {resp.status_code})")
