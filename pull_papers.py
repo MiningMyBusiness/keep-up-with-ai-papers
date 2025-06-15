@@ -87,7 +87,7 @@ def download_arxiv_pdf(arxiv_id: str, dest_folder: str, filename: str):
             print(f"    ↳ Downloaded: {pdf_url}")
         else:
             logger.warning(f"PDF not found for {arxiv_id} (status {resp.status_code})")
-            print(f"    ❌ PDF not found for {arxiv_id} (status {resp.status_code})")
+            print(f"  PDF not found for {arxiv_id} (status {resp.status_code})")
     except Exception as e:
         logger.error(f"Error downloading {pdf_url}: {e}")
         raise
@@ -132,7 +132,7 @@ def main(start_date, end_date, out_dir="papers", show_eta=False):
         except Exception as e:
             error_msg = f"Failed to get paper links for {dt}: {e}"
             logger.error(error_msg)
-            print(f"❌ {error_msg}")
+            print(f" {error_msg}")
             continue
 
         for i, arxiv_id in enumerate(arxiv_ids, 1):
@@ -146,7 +146,7 @@ def main(start_date, end_date, out_dir="papers", show_eta=False):
             except Exception as e:
                 error_msg = f"Error downloading {arxiv_id}: {e}"
                 logger.error(error_msg)
-                print(f"    ❌ {error_msg}")
+                print(f"    {error_msg}")
 
 if __name__ == "__main__":
     import argparse
@@ -172,5 +172,5 @@ if __name__ == "__main__":
         logger.info("Script completed successfully")
     except Exception as e:
         logger.critical(f"Unhandled exception: {e}", exc_info=True)
-        print(f"❌ Critical error: {e}")
+        print(f"Critical error: {e}")
         exit(1)
