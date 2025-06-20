@@ -36,10 +36,41 @@ def extract_paper_info(pdf_path):
         }
     return None
 
-
 def generate_markdown(papers_dir, markdown_dir, start_date, end_date):
     """Generate markdown summary of papers."""
-    # ... existing code ...
+    logger.info(f"Generating markdown summary for papers from {start_date} to {end_date}")
+    
+    # Ensure markdown directory exists
+    os.makedirs(markdown_dir, exist_ok=True)
+    
+    # Find all PDF files in the papers directory
+    pdf_files = [f for f in Path(papers_dir).glob("*.pdf")]
+    
+    # Get existing markdown files
+    existing_markdown_files = set(os.path.splitext(f.name)[0] for f in Path(markdown_dir).glob("*.md"))
+    
+    # Extract paper information
+    papers = []
+    for pdf_file in pdf_files:
+        paper_info = extract_paper_info(str(pdf_file))
+        if paper_info:
+            # Check if the paper is within our date range
+            paper_date = datetime.strptime(paper_info['date'], '%Y-%m-%d')
+            
+            # Check if markdown already exists for this PDF
+            pdf_basename = os.path.splitext(paper_info['filename'])[0]
+            if pdf_basename in existing_markdown_files:
+                logger.debug(f"Skipping {pdf_basename} - markdown already exists")
+                continue
+                
+            papers.append(paper_info)
+    
+    if not papers:
+        logger.info("No new papers to process")
+        return None
+    
+    # Initialize MarkItDown for paper processing
+    markitdown = MarkItDown()
     
     # Process each paper and create individual markdown files
     processed_files = []
